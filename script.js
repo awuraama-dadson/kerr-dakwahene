@@ -39,6 +39,15 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = form.querySelector("button[type=submit]");
   const data = Object.fromEntries(new FormData(form));
+  // Hidden spam trap: people never see it, bots fill it in. Never send it with the message.
+  const isBot = Boolean(data.botcheck || data._honey);
+  delete data.botcheck;
+  delete data._honey;
+  if (isBot) {
+    note.textContent = "Thank you! Your message has been sent. I'll be in touch soon.";
+    form.reset();
+    return;
+  }
   data.access_key = "9ee61b4e-5fac-4220-9d7b-e97d7f06bafa";
   data.subject = `New ${data.type} enquiry from ${data.name}`;
   data.from_name = "Dr. Dakwahene Website";
