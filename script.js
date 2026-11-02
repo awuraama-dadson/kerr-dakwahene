@@ -31,31 +31,33 @@ const observer = new IntersectionObserver(
 );
 document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
 
-// Contact form: sends each message to Kerr's inbox via FormSubmit (formsubmit.co)
+// Contact form: sends each message to thedakwahenepodcast@gmail.com via Web3Forms (web3forms.com).
+// The access key is tied to that inbox and is meant to be public.
 const form = document.getElementById("contactForm");
 const note = document.getElementById("formNote");
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = form.querySelector("button[type=submit]");
   const data = Object.fromEntries(new FormData(form));
-  data._subject = `New ${data.type} enquiry from ${data.name}`;
-  data._template = "table";
+  data.access_key = "9ee61b4e-5fac-4220-9d7b-e97d7f06bafa";
+  data.subject = `New ${data.type} enquiry from ${data.name}`;
+  data.from_name = "Dr. Dakwahene Website";
   btn.disabled = true;
   btn.textContent = "Sending…";
   note.textContent = "";
   try {
-    const res = await fetch("https://formsubmit.co/ajax/thedakwahenepodcast@gmail.com", {
+    const res = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(data),
     });
     const json = await res.json();
-    if (!res.ok || json.success === false || json.success === "false") throw new Error(json.message);
+    if (!res.ok || !json.success) throw new Error(json.message);
     note.textContent = "Thank you! Your message has been sent. I'll be in touch soon.";
     form.reset();
   } catch {
     // Keep the visitor's message: offer it pre-filled in their own email app
-    const mailto = `mailto:thedakwahenepodcast@gmail.com?subject=${encodeURIComponent(data._subject)}&body=${encodeURIComponent(`${data.message}\n\n${data.name}\n${data.email}`)}`;
+    const mailto = `mailto:thedakwahenepodcast@gmail.com?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(`${data.message}\n\n${data.name}\n${data.email}`)}`;
     note.innerHTML = `Sorry, the form couldn't send your message just now. <a href="${mailto}">Send it by email instead</a>, it's already written for you.`;
   } finally {
     btn.disabled = false;
